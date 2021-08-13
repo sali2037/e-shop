@@ -1,0 +1,41 @@
+{% extends 'shopapp/base.html' %}
+
+
+<!-- ========================= SECTION MAIN ========================= -->
+{% block banner %}
+<img src="{{MEDIA_URL}}/shopapp/images/banners/1.jpg " class="img-fluid rounded">
+{% endblock%}
+<!-- ========================= SECTION MAIN END// ========================= -->
+
+<!-- ========================= SECTION  ========================= -->
+{% block content %}
+
+
+<header class="section-heading">
+	<a href="./store.html" class="btn btn-outline-primary float-right">See all</a>
+	<h3 class="section-title">Popular products</h3>
+</header>
+<!-- sect-heading -->
+
+
+<div class="row">
+	{% for product in product_list %}
+	<div class="col-md-3">
+		<div class="card card-product-grid">
+			<a href="{{product.category}}/{{product.slug}}" class="img-wrap"> <img src="{{MEDIA_URL}}{{product.image}}"> </a>
+			<figcaption class="info-wrap">
+				<a href="{{product.get_url}}" class="title">{{product.product_name}}</a>
+				<div class="price mt-1">{{product.price}}</div> <!-- price-wrap.// -->
+			</figcaption>
+		</div>
+	</div>
+	{% endfor %}
+</div>
+
+{% endblock%}
+<!-- ========================= SECTION  END// ========================= -->
+
+
+{% block footer %}
+{% endblock %}
+<!-- ========================= FOOTER ========================= -->
