@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'accounts',
     'category',
     'store',
+    'carts',
+    'debug_toolbar',
 
 ]
 
@@ -54,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'onlineshop.urls'
@@ -72,6 +75,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 # Category context_processors
                 'category.context_processors.menu_links',
+                'carts.context_processors.artikel_number'
             ],
         },
     },
@@ -138,3 +142,8 @@ MEDIA_URL  = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL='/login/'
+INTERNAL_IPS = [
+    # ...
+    '127.0.0.1',
+    # ...
+]

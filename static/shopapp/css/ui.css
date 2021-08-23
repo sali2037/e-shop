@@ -1394,7 +1394,7 @@ a[class*=card]:hover .title {
   margin-right: 15px;
 }
 .item-option-select .btn {
-  min-width: 80px;
+  min-width: 40px;
 }
 
 /* ================ PAGES HEADER ================== */

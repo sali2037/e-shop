@@ -129,36 +129,60 @@
 
 <div class="row">
       {% for product in product_list %}
+			<div class="col-md-4">
+				<figure class="card card-product-grid">
+					<div class="img-wrap">
+						<img src="{{MEDIA_URL}}{{product.image}}">
+		      </div> <!-- img-wrap.// -->
+					<figcaption class="info-wrap">
+						<div class="fix-height">
+							<a href="{% url 'store:product_detail' slug=product.slug category_slug=product.category.slug %}" class="title">{{product.description}}</a>
+							<div class="price-wrap mt-2">
+								<span class="price">{{product.price}}</span>
+								<del class="price-old">{{product.price}}</del>
+							</div> <!-- price-wrap.// -->
+						</div>
+						{% if product.stock >= 1 %}
+										{% if product.id in in_cart %}
+									  	<a href="{% url 'store:product_detail' slug=product.slug category_slug=product.category.slug %}" class="btn btn-block btn-success"><i class="fas fa-check"></i> Added to cart </a>
+										{% else %}
+											<a href="{% url 'store:product_detail' slug=product.slug category_slug=product.category.slug %}" class="btn btn-block btn-primary">Add to cart </a>
+										{% endif %}
+							{% else %}
+							<a href="#" class="btn btn-block btn-danger">Out of Stock! </a>
+						{% endif %}
 
-	<div class="col-md-4">
-		<figure class="card card-product-grid">
-			<div class="img-wrap">
-				<img src="{{MEDIA_URL}}{{product.image}}">
-      </div> <!-- img-wrap.// -->
-			<figcaption class="info-wrap">
-				<div class="fix-height">
-					<a href="{% url 'store:product_detail' slug=product.slug category_slug=product.category.slug %}" class="title">{{product.description}}</a>
-					<div class="price-wrap mt-2">
-						<span class="price">{{product.price}}</span>
-						<del class="price-old">{{product.price}}</del>
-					</div> <!-- price-wrap.// -->
-				</div>
-				<a href="#" class="btn btn-block btn-primary">Add to cart </a>
-			</figcaption>
-
-		</figure>
-	</div> <!-- col.// -->
+					</figcaption>
+				</figure>
+			</div> <!-- col.// -->
     {% endfor %}
 </div> <!-- row end.// -->
 
 
+
+
+
+
 <nav class="mt-4" aria-label="Page navigation sample">
   <ul class="pagination">
-    <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-    <li class="page-item"><a class="page-link" href="#">2</a></li>
-    <li class="page-item"><a class="page-link" href="#">3</a></li>
-    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+			{% if page_obj.has_previous %}
+	    	<li class="page-item "><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+			{% else %}
+				<li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+			{% endif %}
+			{% for i in page_obj.paginator.page_range %}
+			  {% if page_obj.number == i %}
+        <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
+		    {% else %}
+        <li class="page-item "><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+				{% endif %}
+			{% endfor %}
+
+        {% if page_obj.has_next %}
+				<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+				<li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a></li>
+        {% endif %}
+
   </ul>
 </nav>
 
