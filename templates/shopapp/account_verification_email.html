@@ -1,0 +1,12 @@
+{% autoescape off %}
+<h3>
+Hi <b>{{user.first_name}}</b>, please Click on blew link to complete
+your Regestration
+</h3>
+
+http://{{domain}}{% url 'accounts:activate'  uidb64=uid token=token %}
+
+<h5>
+if you think its not yours , please ignore it
+</h5
+{% endautoescape %}

@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'store',
     'carts',
     'debug_toolbar',
+    'widget_tweaks',
+    'crispy_forms',
 
 ]
 
@@ -147,3 +149,16 @@ INTERNAL_IPS = [
     '127.0.0.1',
     # ...
 ]
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.INFO: 'danger',
+    50: 'critical',
+}
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST           =  'smtp.gmail.com'
+EMAIL_PORT           =  587
+EMAIL_HOST_USER      =  'tolooo.tk@gmail.com'
+EMAIL_HOST_PASSWORD  =  '0258654ALi'
+EMAIL_USE_TLS        =  True

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse,reverse_lazy
 from django.views.generic import ListView,CreateView
 from store.models import Product,Variation
 from carts.models import Cart,CartItem
@@ -76,7 +76,7 @@ def add_cart(request,product_id,minus=None):
                 for vari in variation_list:
                     item.variations.add(vari)
             item.save()
-            return HttpResponseRedirect(reverse_lazy('carts:show_carts'))        
+            return HttpResponseRedirect(reverse_lazy('carts:show_carts'))
     else:
         cart_item=CartItem.objects.create(
                                         product=product,

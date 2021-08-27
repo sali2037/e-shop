@@ -70,3 +70,8 @@ class Account(AbstractBaseUser):
         return self.is_admin
     def has_module_perms(self,add_label):
         return True
+class ResetPassword(models.Model):
+    uidb64      = models.CharField (max_length=64)
+    token       = models.CharField (max_length=200)
+    def __str__(self):
+        return self.uidb64

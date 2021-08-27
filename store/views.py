@@ -25,9 +25,9 @@ class StoreView(ListView):
     def get_context_data(self):
         context=super().get_context_data()
         try:
-            cart=Cart.objects.get(cart_id=_cart_id(self.request))
+            cart=Cart.objects.get(cart_id=_cart_id)
         except Cart.DoesNotExist:
-            _cart_id(request)
+            _cart_id(self.request)
             cart=None
         added_to_cart=CartItem.objects.all().filter(cart=cart)
         in_cart=[]
