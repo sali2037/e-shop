@@ -4,24 +4,32 @@ from django.urls import reverse,reverse_lazy
 from django.views.generic import ListView,CreateView
 from store.models import Product,Variation
 from carts.models import Cart,CartItem
-# Create your views here.
+from carts.forms import BilingAdressForm
+from django.db.models import Q
+from django.contrib.auth import login,logout
 
+# Create your views here.
+from django.contrib.auth.decorators import login_required
 def carts(request):
     try:
-        cart_id=_cart_id(request)
-        cart=Cart.objects.get(cart_id=cart_id)
-        cart_items=CartItem.objects.all().filter(cart=cart.id)
+        if request.user.is_authenticated:
+            cart_items=CartItem.objects.all().filter(user=request.user)
+        else:
+            cart_id=_cart_id(request)
+            cart=Cart.objects.get(cart_id=cart_id)
+            cart_items=CartItem.objects.all().filter(cart=cart.id)
         total_price=0
         for item in cart_items:
             total_price += item.product.price*item.quantity
         tax_price=round((2*total_price)/100,2)
         totalTax=total_price+tax_price
 
-        context={'cart':cart,'cart_items':cart_items,'total_price':round(total_price,2),'totalTax':totalTax,'tax_price':tax_price}
+        context={'cart_items':cart_items,'total_price':round(total_price,2),'totalTax':totalTax,'tax_price':tax_price}
 
         return render(request, 'shopapp/cart.html',context)
-    except CartItem.DoesNotExist:
-        pass
+    except (CartItem.DoesNotExist,Cart.DoesNotExist):
+        return render(request, 'shopapp/cart.html')       
+
 
 
 
@@ -50,9 +58,11 @@ def add_cart(request,product_id,minus=None):
         cart= Cart.objects.create(cart_id=cart_id)
     cart.save()
 ############################
-    cart_exist = CartItem.objects.filter(product_id=product.id,cart_id=cart).exists()
-    if cart_exist:
+    if request.user.is_authenticated:
+        cart_item = CartItem.objects.filter(user=request.user,product=product)
+    else:
         cart_item=CartItem.objects.filter(product=product,cart=cart)
+    if cart_item:
         if len(variation_list) > 0:
             existing_variation=[]
             id=[]
@@ -75,6 +85,8 @@ def add_cart(request,product_id,minus=None):
                 item = CartItem.objects.create(product=product,quantity=1,cart=cart)
                 for vari in variation_list:
                     item.variations.add(vari)
+            if request.user.is_authenticated:
+                item.user=request.user
             item.save()
             return HttpResponseRedirect(reverse_lazy('carts:show_carts'))
     else:
@@ -86,6 +98,8 @@ def add_cart(request,product_id,minus=None):
         if len(variation_list) > 0:
             for vari in variation_list:
                 cart_item.variations.add(vari)
+        if request.user.is_authenticated:
+            cart_item.user=request.user
         cart_item.save()
         if cart_item:
             return HttpResponseRedirect(reverse('carts:show_carts'))
@@ -93,11 +107,9 @@ def add_cart(request,product_id,minus=None):
             return HttpResponseRedirect(reverse('store:product_by_cate'))
 
 
-def remove_cart_item(request,product_id):
+def remove_cart_item(request,pk):
     try:
-        cart=Cart.objects.get(cart_id=_cart_id(request))
-        product=Product.objects.get(id=product_id)
-        cart_item=CartItem.objects.filter(cart=cart,product=product).delete()
+        cart_item=CartItem.objects.filter(pk=pk).delete()
         return HttpResponseRedirect(reverse('carts:show_carts'))
     except CartItem.DoesNotExist:
         return HttpResponseRedirect(reverse('carts:show_carts'))
@@ -125,12 +137,23 @@ def access_session(request):
         return HttpResponse(response)
     else:
         return redirect('cart_cookie/')
-
-
-
 def cart_cookie(request):
     request.session.create()
 
     request.session['name'] = 'Ali'
     request.session['password'] = 'Eskandary'
     return HttpResponse('ok')
+
+
+
+@login_required(login_url='/accounts/login/')
+def checkout(request):
+    cart_item     = CartItem.objects.filter(user_id=request.user)
+    total_price=0
+    for item in cart_item:
+        total_price += item.get_price() * item.quantity
+    tax_price     = (total_price*10)/100
+    totalTax      = tax_price + total_price
+    form          = BilingAdressForm()
+    template_name ='shopapp/place-order.html'
+    return render(request,template_name,context={'cart_items':cart_item,'form':form,'total_price':total_price,'totalTax':totalTax,'tax_price':tax_price})

@@ -75,3 +75,15 @@ class ResetPassword(models.Model):
     token       = models.CharField (max_length=200)
     def __str__(self):
         return self.uidb64
+
+class BilingAdress(models.Model):
+    user         = models.ForeignKey(Account,on_delete=models.CASCADE)
+    country      = models.CharField(max_length=200)
+    state        = models.CharField(max_length=200)
+    street       = models.CharField(max_length=250)
+    hause_number = models.IntegerField(max_length=10)
+    postalconde  = models.CharField(max_length=12)
+    
+
+    def __str__(self):
+        return self.user.email

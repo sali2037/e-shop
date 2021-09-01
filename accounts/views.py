@@ -15,14 +15,16 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.utils.encoding import force_bytes
 from django.core.exceptions import ValidationError
-
-
-
+from django.contrib.auth import logout
+from carts.models import CartItem,Cart
+from carts.views import _cart_id
 
 # Create your views here.
 
 
-
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect('/')
 class RegisterView(FormView):
     template_name='shopapp/register.html'
     form_class=RegistrationForm
@@ -60,12 +62,81 @@ class Login(FormView):
         user         = authenticate(email=email,password=password)
         if user:
             if user.is_active:
+                try:
+                    ######    new In Einkauf      ####################
+                    cart=Cart.objects.get(cart_id=_cart_id(self.request))
+                    cart_items=CartItem.objects.filter(cart=cart)
+                    product_variation=[]
+                    idd=[]
+                    for item in cart_items:
+                        variation         = item.variations.all()
+                        product_variation.append(list(variation))
+                        idd.append(item.id)
+                    print ("--------------------product_variation------------ ")
+                    print(product_variation)
+                    print ("--------------------idd------------ ")
+                    print(idd)
+
+                    ######    Existing Variation  ####################
+                    old_carts=CartItem.objects.filter(user=user)
+                    old_variations=[]
+                    id=[]
+                    for item in old_carts:
+                        variations=item.variations.all()
+                        old_variations.append(list(variations))
+                        id.append(item.id)
+                    print ("--------------------old_variations------------ ")
+                    print(product_variation)
+                    print ("--------------------id------------ ")
+                    print(product_variation)
+
+
+                    for item in product_variation:
+                        if item in old_variations:
+                            index = old_variations.index(item)
+                            item_id=id[index]
+                            print ("--------------------index------------ ")
+                            print(index)
+                            print ("--------------------item_id------------ ")
+                            print(item_id)
+
+                            item_old=CartItem.objects.get(id=item_id)
+                            ###################  get Quantity von erst ###############
+                            for item in old_variations:
+                                if item in product_variation:
+                                    index = product_variation.index(item)
+                                    item_session=idd[index]
+                                    item_session=CartItem.objects.get(id=item_session)
+                                    item_session_quantity = item_session.quantity
+                                    print ("--------------------index------------ ")
+                                    print(index)
+                                    print ("--------------------item_session------------ ")
+                                    print(item_session)
+                            item_old.quantity+=item_session_quantity
+                            item_old.user=user
+                            item_old.save()
+                        else:
+                            cart_items=CartItem.objects.filter(cart=cart)
+                            for item in cart_items:
+                                item.user=user
+                                item.save()
+
+
+                    #######################################################
+
+
+                except (Cart.DoesNotExist,CartItem.DoesNotExist):
+                    pass
                 login(self.request, user)
+                next=self.request.GET.get('next')
                 if user.is_superadmin or user.is_staff:
                     messages.success(self.request,'{user} Successfully signed'.format(user=user))
                     return HttpResponseRedirect('admin')
                 messages.success(self.request,'  Welcomen {user}'.format(user=user))
-                return HttpResponseRedirect(reverse('accounts:dashboard'))
+                if next:
+                    return HttpResponseRedirect(next)
+                else:
+                    return HttpResponseRedirect(reverse('accounts:dashboard'))
             else:
                 messages.error(self.request,'  your account is not active')
                 return HttpResponseRedirect(reverse('accounts:login'))
@@ -73,7 +144,8 @@ class Login(FormView):
             messages.error(self.request,' Sie mussen zuerst ihre konto activieren')
             return HttpResponseRedirect(reverse('accounts:login'))
 
-
+def variation(request):
+    pass
 def activate(request,uidb64,token):
     try:
         uid              = urlsafe_base64_decode(uidb64).decode()

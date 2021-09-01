@@ -4,10 +4,15 @@ from carts.views import _cart_id
 def artikel_number(request):
     num=0
     try:
-        cart=Cart.objects.get(cart_id=_cart_id(request))
+        if request.user.is_authenticated:
+            cart_item=CartItem.objects.all().filter(user=request.user)
+        else:
+            cart_id=_cart_id(request)
+            cart=Cart.objects.get(cart_id=cart_id)
+            cart_item=CartItem.objects.all().filter(cart=cart.id)
+        for item in cart_item:
+            num+=item.quantity
     except Cart.DoesNotExist:
-        cart=None
-    cart_item=CartItem.objects.all().filter(cart=cart)
-    for item in cart_item:
-        num+=item.quantity
+        num=0
+
     return dict(num=num)
