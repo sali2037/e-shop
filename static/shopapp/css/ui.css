@@ -1413,3 +1413,12 @@ a[class*=card]:hover .title {
 }
 
 /*# sourceMappingURL=ui.css.map */
+
+
+ul.errorlist li{
+  list-style-type: none !important;
+  color:red;
+  font-weight: bold;
+  font-size:13px;
+  font-family:Arial;
+}

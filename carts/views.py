@@ -10,6 +10,7 @@ from django.contrib.auth import login,logout
 
 # Create your views here.
 from django.contrib.auth.decorators import login_required
+
 def carts(request):
     try:
         if request.user.is_authenticated:
@@ -28,7 +29,7 @@ def carts(request):
 
         return render(request, 'shopapp/cart.html',context)
     except (CartItem.DoesNotExist,Cart.DoesNotExist):
-        return render(request, 'shopapp/cart.html')       
+        return render(request, 'shopapp/cart.html')
 
 
 

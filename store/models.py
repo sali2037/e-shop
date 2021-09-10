@@ -1,6 +1,8 @@
 from django.db import models
 from category.models import Category
 from django.urls import reverse
+from accounts.models import Account
+from django.db.models import Avg
 # Create your models here.
 class Product(models.Model):
     product_name        = models.CharField(max_length=200,unique=True)
@@ -8,7 +10,6 @@ class Product(models.Model):
     description         = models.TextField(blank=True)
     price               = models.FloatField()
     image               = models.ImageField(upload_to='product_images')
-#    farbe               = models.CharField(max_length=100,default='Blau')
     stock               = models.IntegerField()
     is_available        = models.BooleanField(default=True)
     category            = models.ForeignKey(Category,on_delete=models.CASCADE,related_name='re_categories')
@@ -17,6 +18,12 @@ class Product(models.Model):
 
     def __str__(self):
         return self.product_name
+    def get_rating(self):
+        avrage=ReviewRating.objects.filter(product=self,status=True).aggregate(avrage=Avg('rating'))
+        avg=0
+        if avrage['avrage'] is not None:
+            avg=float(avrage['avrage'])
+        return avg
 
 
     def get_url(self):
@@ -51,3 +58,17 @@ class Article(models.Model):
     publications = models.ManyToManyField(Publication)
     def __str__(self):
         return self.titr
+
+
+class ReviewRating(models.Model):
+    product     = models.ForeignKey(Product,on_delete=models.CASCADE,related_name="reviews")
+    user        = models.ForeignKey(Account,on_delete=models.CASCADE)
+    subject     = models.CharField(max_length=200,blank=True)
+    review      = models.TextField(max_length=500,blank=True)
+    rating      = models.FloatField()
+    ip          = models.CharField(max_length=20,blank=True)
+    status      = models.BooleanField(default=True,blank=True)
+    created_at  = models.DateTimeField(auto_now_add=True,blank=True)
+    updated_at  = models.DateTimeField(auto_now=True,blank=True)
+    def __str__(self):
+        return self.subject

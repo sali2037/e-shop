@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'widget_tweaks',
     'crispy_forms',
+    'order',
+    'django.contrib.humanize',
 
 ]
 
@@ -58,7 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'onlineshop.urls'
@@ -162,3 +164,8 @@ EMAIL_PORT           =  587
 EMAIL_HOST_USER      =  'tolooo.tk@gmail.com'
 EMAIL_HOST_PASSWORD  =  '0258654ALi'
 EMAIL_USE_TLS        =  True
+
+
+
+
+LOGIN_URL='/accounts/login/'

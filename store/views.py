@@ -4,10 +4,16 @@ from store.models import Product
 from category.models import Category
 from carts.models import Cart,CartItem
 from carts.views import _cart_id
-from django.http import HttpResponse
+from django.http import HttpResponse,HttpResponseRedirect
+from django.urls import reverse
+from django.contrib import  messages
 ############ Nur fur fuction views ######################
 from django.core.paginator import Paginator
 from store.models import Publication,Article
+from store.forms import ReviewForm
+from store.models import ReviewRating
+from django.contrib.auth.decorators import login_required
+from order.models import OrderProduct
 # Create your views here.
 class StoreView(ListView):
     model=Product
@@ -60,12 +66,6 @@ def search(request):
 
 
 
-class ProductView(DetailView):
-    model=Product
-    template_name='shopapp/product-detail.html'
-
-
-
 
 def product_detail(request,category_slug,slug):
     template_name='shopapp/product-detail.html'
@@ -76,9 +76,38 @@ def product_detail(request,category_slug,slug):
         _cart_id(request)
         cart=None
     in_cart=CartItem.objects.filter(cart=cart,product=product).exists()
-    context={'product':product,'in_cart':in_cart}
+    if request.user.is_authenticated:
+        review_erlaubnis=OrderProduct.objects.filter(product=product,user=request.user).exists()
+    else:
+        review_erlaubnis=False
+    review_form =  ReviewForm
+    rr=ReviewRating.objects.filter(product=product)
+    sum=0
+    for r in rr:
+        sum+=r.rating
+    print(sum)
+    context={'product':product,'in_cart':in_cart,'form':review_form,'review_erlaubnis':review_erlaubnis}
     return render(request,template_name, context)
 
+@login_required(login_url='/accounts/login/')
+def submit_reveiw(request,product_id):
+    url = request.META.get('HTTP_REFERER')
+    try:
+        review=ReviewRating.objects.get(product_id=product_id,user=request.user)
+        form=ReviewForm(request.POST,instance=review)
+        form.save()
+        return HttpResponseRedirect(url)
+    except ReviewRating.DoesNotExist:
+        form=ReviewForm(request.POST)
+        if form.is_valid():
+            review=ReviewRating()
+            review.user=request.user
+            review.product_id=product_id
+            review.rating=form.cleaned_data['rating']
+            review.subject=form.cleaned_data['subject']
+            review.review=form.cleaned_data['review']
+            review.save()
+            return HttpResponseRedirect(url)
 
 
 def test(request):

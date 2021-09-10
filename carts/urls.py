@@ -10,7 +10,7 @@ urlpatterns=[
         path('deletecookie/', views.cookie_delete),
         path('cartcookie/', views.cart_cookie),
         path('access_session/', views.access_session),
-        path('checkout/',views.checkout, name='checkout')
+#        path('checkout/',views.checkout, name='checkout')
 
 
 ]
